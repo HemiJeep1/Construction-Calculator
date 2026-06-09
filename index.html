@@ -364,6 +364,8 @@
         <button type="button" class="tab tool-tab" data-open-tool="Stair Calculator">Stair</button>
         <button type="button" class="tab tool-tab" data-open-tool="Wall Paneling Calculator">Wall Paneling</button>
         <button type="button" class="tab" data-target="electrical">Electrical</button>
+        <button type="button" class="tab" data-target="concrete">Concrete Volume</button>
+        <button type="button" class="tab" data-target="buildingarea">Building Area</button>
       </div>
     </nav>
 
@@ -673,6 +675,63 @@
 
         <div class="actions"><button type="button" class="primary" data-calc="electrical">Calculate Electrical</button><button type="button" class="secondary" data-clear="electrical">Clear</button></div>
         <div class="error" id="electrical-error"></div><div class="results" id="electrical-results"></div>
+      </section>
+
+      <section id="concrete" class="card calc-panel hidden" data-type="volume">
+        <div class="section-title"><div><h2>Concrete Volume Calculator</h2><p class="hint">Calculate concrete for slabs, footings, walls, and round columns. Includes cubic yards, cubic metres, waste, and bag estimates.</p></div><span class="formula">Volume = L × W × T</span></div>
+
+        <div class="converter" style="margin-bottom:14px">
+          <div class="measurement"><label for="concrete-shape">Concrete Type</label><select id="concrete-shape">
+            <option value="slab" selected>Slab / Pad</option>
+            <option value="footing">Strip Footing</option>
+            <option value="wall">Concrete Wall</option>
+            <option value="column">Round Column / Pier</option>
+          </select></div>
+          <div class="measurement"><label for="concrete-quantity">Quantity</label><input id="concrete-quantity" type="number" step="1" min="1" value="1" /><span class="sub-label">pieces / pours</span></div>
+          <div class="measurement"><label for="concrete-waste">Waste / Overrun</label><input id="concrete-waste" type="number" step="any" min="0" value="10" /><span class="sub-label">percent</span></div>
+          <div class="measurement"><label for="concrete-bag-yield">Bag Size / Yield</label><select id="concrete-bag-yield">
+            <option value="0.30">40 lb bag - approx. 0.30 ft³</option>
+            <option value="0.45">60 lb bag - approx. 0.45 ft³</option>
+            <option value="0.60" selected>80 lb bag - approx. 0.60 ft³</option>
+            <option value="1.00">Custom / bulk - 1.00 ft³</option>
+          </select></div>
+        </div>
+
+        <p class="hint"><strong>For slab, footing, and wall:</strong> use length, width, and thickness. <strong>For round column/pier:</strong> use diameter and height.</p>
+        <div class="grid three" data-fields="length,width,thickness,diameter,height"></div>
+        <div class="actions"><button type="button" class="primary" data-calc="concrete">Calculate Concrete</button><button type="button" class="secondary" data-clear="concrete">Clear</button></div>
+        <div class="error" id="concrete-error"></div><div class="results" id="concrete-results"></div>
+      </section>
+
+
+      <section id="buildingarea" class="card calc-panel hidden" data-type="area">
+        <div class="section-title"><div><h2>Building Area Calculator</h2><p class="hint">Calculate footprint area, gross floor area, perimeter, and exterior wall area for a rectangular building.</p></div><span class="formula">Area = L × W</span></div>
+
+        <div class="converter" style="margin-bottom:14px">
+          <div class="measurement"><label for="buildingarea-floors">Number of Floors</label><input id="buildingarea-floors" type="number" step="1" min="1" value="1" /><span class="sub-label">floors</span></div>
+          <div class="measurement"><label for="buildingarea-waste">Area Add-On / Waste</label><input id="buildingarea-waste" type="number" step="any" min="0" value="0" /><span class="sub-label">percent</span></div>
+        </div>
+        <p class="hint"><strong>Length and width</strong> calculate the building footprint. <strong>Wall height</strong> is optional and is used for exterior wall area.</p>
+        <div class="grid three" data-fields="length,width,wall height"></div>
+
+        <div class="converter" style="margin-top:14px;margin-bottom:10px">
+          <label class="measurement" style="display:flex;gap:10px;align-items:center;flex-direction:row;min-height:auto">
+            <input id="buildingarea-subtract-openings" type="checkbox" checked style="width:auto" />
+            <span><strong>Subtract openings from exterior wall area</strong><br><small class="sub-label">Add window and door sizes below. Area is deducted only when wall height is entered.</small></span>
+          </label>
+        </div>
+
+        <div class="card" style="box-shadow:none;margin:10px 0 14px;padding:12px;background:rgba(15,23,42,.35)">
+          <div class="section-title" style="margin-bottom:8px"><div><h3 style="margin:0">Windows and Doors</h3><p class="hint">Enter each opening size and quantity. Use the current input unit mode: feet/inches/fractions or metres/millimetres.</p></div></div>
+          <div id="buildingarea-openings"></div>
+          <div class="actions" style="margin-top:10px">
+            <button type="button" class="secondary" id="buildingarea-add-window">+ Add Window</button>
+            <button type="button" class="secondary" id="buildingarea-add-door">+ Add Door</button>
+          </div>
+        </div>
+
+        <div class="actions"><button type="button" class="primary" data-calc="buildingarea">Calculate Building Area</button><button type="button" class="secondary" data-clear="buildingarea">Clear</button></div>
+        <div class="error" id="buildingarea-error"></div><div class="results" id="buildingarea-results"></div>
       </section>
 
       <section id="converter" class="card calc-panel hidden">
@@ -1390,6 +1449,148 @@
       return results;
     }
 
+    function calculateConcrete() {
+      const shape = document.getElementById('concrete-shape').value;
+      const qty = Math.max(1, Math.ceil(Number(document.getElementById('concrete-quantity').value) || 1));
+      const wastePct = Math.max(0, Number(document.getElementById('concrete-waste').value) || 0);
+      const bagYield = Number(document.getElementById('concrete-bag-yield').value) || 0.6;
+
+      let cubicFeet = 0;
+      let description = '';
+      if (shape === 'column') {
+        const v = validatePositive('concrete', ['diameter', 'height']);
+        const radius = v.diameter / 2;
+        cubicFeet = Math.PI * radius * radius * v.height * qty;
+        description = `Round column / pier × ${qty}`;
+      } else {
+        const v = validatePositive('concrete', ['length', 'width', 'thickness']);
+        cubicFeet = v.length * v.width * v.thickness * qty;
+        description = `${titleCase(shape)} × ${qty}`;
+      }
+
+      const withWaste = cubicFeet * (1 + wastePct / 100);
+      const cubicYards = cubicFeet / 27;
+      const cubicYardsWaste = withWaste / 27;
+      const cubicMeters = cubicFeet * VOLUME_TO_CUBIC_M['cu ft'];
+      const cubicMetersWaste = withWaste * VOLUME_TO_CUBIC_M['cu ft'];
+      const litres = cubicMeters * 1000;
+      const litresWaste = cubicMetersWaste * 1000;
+      const bags = Math.ceil(withWaste / bagYield);
+
+      return [
+        { label: 'Concrete Type', value: description },
+        { label: 'Base Volume', value: `${fmt(cubicFeet)} ft³ / ${fmt(cubicYards, 3)} yd³` },
+        { label: 'Base Volume Metric', value: `${fmt(cubicMeters, 4)} m³ / ${fmt(litres, 1)} L` },
+        { label: `With ${fmt(wastePct, 2)}% Waste`, value: `${fmt(withWaste)} ft³ / ${fmt(cubicYardsWaste, 3)} yd³` },
+        { label: 'With Waste Metric', value: `${fmt(cubicMetersWaste, 4)} m³ / ${fmt(litresWaste, 1)} L` },
+        { label: 'Estimated Bags', value: `${bags} bags at ${fmt(bagYield, 2)} ft³ each` },
+        { label: 'Order Note', value: 'For ready-mix, order by cubic yards or cubic metres. Bag estimates are approximate; check the yield on the bag label.', wide: true }
+      ];
+    }
+
+
+
+    let buildingAreaOpeningCounter = 0;
+    function openingLengthField(prefix, label) {
+      const clean = String(label).toLowerCase().replaceAll(' ', '-');
+      return `
+        <div class="measurement opening-measurement">
+          <label>${label}</label>
+          <div class="triple imperial-row">
+            <div><input id="${prefix}-${clean}-ft" type="text" inputmode="decimal" placeholder="0" /><span class="sub-label">ft</span></div>
+            <div><input id="${prefix}-${clean}-in" type="text" inputmode="decimal" placeholder="0" /><span class="sub-label">in</span></div>
+            <div><select id="${prefix}-${clean}-frac">${fractionOptions()}</select><span class="sub-label">fraction</span></div>
+          </div>
+          <div class="double metric-row">
+            <div><input id="${prefix}-${clean}-m" type="number" step="any" min="0" placeholder="0" /><span class="sub-label">m</span></div>
+            <div><input id="${prefix}-${clean}-mm" type="number" step="any" min="0" placeholder="0" /><span class="sub-label">mm</span></div>
+          </div>
+        </div>`;
+    }
+    function addBuildingAreaOpening(kind) {
+      const container = document.getElementById('buildingarea-openings');
+      if (!container) return;
+      buildingAreaOpeningCounter += 1;
+      const prefix = `buildingarea-opening-${buildingAreaOpeningCounter}`;
+      const row = document.createElement('div');
+      row.className = 'converter building-opening-row';
+      row.dataset.kind = kind;
+      row.dataset.prefix = prefix;
+      row.style.marginBottom = '10px';
+      row.innerHTML = `
+        <div class="measurement"><label>Type</label><strong>${kind === 'window' ? 'Window' : 'Door'}</strong><span class="sub-label">opening</span></div>
+        <div class="measurement"><label>Quantity</label><input class="opening-qty" type="number" min="1" step="1" value="1" /><span class="sub-label">count</span></div>
+        ${openingLengthField(prefix, 'Width')}
+        ${openingLengthField(prefix, 'Height')}
+        <div class="measurement"><label>Remove</label><button type="button" class="secondary opening-remove">Remove</button><span class="sub-label">delete row</span></div>`;
+      row.querySelector('.opening-remove').addEventListener('click', () => row.remove());
+      container.appendChild(row);
+    }
+    function readOpeningFeet(prefix, label) {
+      const clean = String(label).toLowerCase().replaceAll(' ', '-');
+      if (currentUnitMode === 'metric') {
+        const meters = Number(document.getElementById(`${prefix}-${clean}-m`).value) || 0;
+        const mm = Number(document.getElementById(`${prefix}-${clean}-mm`).value) || 0;
+        return (meters + mm / 1000) / LENGTH_TO_METERS.foot;
+      }
+      const feet = parseFractionalNumber(document.getElementById(`${prefix}-${clean}-ft`).value);
+      const inches = parseFractionalNumber(document.getElementById(`${prefix}-${clean}-in`).value);
+      const fraction = parseFloat(document.getElementById(`${prefix}-${clean}-frac`).value) || 0;
+      return feet + (inches + fraction) / 12;
+    }
+    function getBuildingAreaOpenings() {
+      let windowSqFt = 0;
+      let doorSqFt = 0;
+      document.querySelectorAll('#buildingarea-openings .building-opening-row').forEach(row => {
+        const prefix = row.dataset.prefix;
+        const qty = Math.max(0, Math.ceil(Number(row.querySelector('.opening-qty').value) || 0));
+        const width = readOpeningFeet(prefix, 'Width');
+        const height = readOpeningFeet(prefix, 'Height');
+        if (qty > 0 && width > 0 && height > 0) {
+          const area = width * height * qty;
+          if (row.dataset.kind === 'door') doorSqFt += area;
+          else windowSqFt += area;
+        }
+      });
+      return { windowSqFt, doorSqFt, totalSqFt: windowSqFt + doorSqFt };
+    }
+
+    function calculateBuildingArea() {
+      const v = validatePositive('buildingarea', ['length', 'width']);
+      const wallHeight = optionalPositive('buildingarea', 'wall height');
+      const floorsRaw = Number(document.getElementById('buildingarea-floors').value) || 1;
+      const floors = Math.max(1, Math.ceil(floorsRaw));
+      const wastePct = Math.max(0, Number(document.getElementById('buildingarea-waste').value) || 0);
+
+      const footprintSqFt = v.length * v.width;
+      const grossSqFt = footprintSqFt * floors;
+      const grossWithWaste = grossSqFt * (1 + wastePct / 100);
+      const perimeterFt = 2 * (v.length + v.width);
+      const diagonalFt = Math.sqrt(v.length * v.length + v.width * v.width);
+      const results = [
+        { label: 'Footprint Area', value: `${fmt(footprintSqFt)} ft² / ${fmt(footprintSqFt * AREA_TO_SQM['sq ft'])} m²`, wide: true },
+        { label: 'Gross Building Area', value: `${fmt(grossSqFt)} ft² / ${fmt(grossSqFt * AREA_TO_SQM['sq ft'])} m²`, wide: true },
+        { label: `Gross Area with ${fmt(wastePct, 2)}% Add-On`, value: `${fmt(grossWithWaste)} ft² / ${fmt(grossWithWaste * AREA_TO_SQM['sq ft'])} m²`, wide: true },
+        { label: 'Floors Counted', value: `${floors}` },
+        { label: 'Building Perimeter', value: `${fmt(perimeterFt)} ft / ${fmt(perimeterFt * LENGTH_TO_METERS.foot)} m` },
+        { label: 'Diagonal Corner-to-Corner', value: `${fmt(diagonalFt)} ft / ${fmt(diagonalFt * LENGTH_TO_METERS.foot)} m` }
+      ];
+      const openings = getBuildingAreaOpenings();
+      const subtractOpenings = document.getElementById('buildingarea-subtract-openings').checked;
+      results.push({ label: 'Window Openings Area', value: `${fmt(openings.windowSqFt)} ft² / ${fmt(openings.windowSqFt * AREA_TO_SQM['sq ft'])} m²` });
+      results.push({ label: 'Door Openings Area', value: `${fmt(openings.doorSqFt)} ft² / ${fmt(openings.doorSqFt * AREA_TO_SQM['sq ft'])} m²` });
+      results.push({ label: 'Total Openings Area', value: `${fmt(openings.totalSqFt)} ft² / ${fmt(openings.totalSqFt * AREA_TO_SQM['sq ft'])} m²`, wide: true });
+      if (wallHeight !== null) {
+        const exteriorWallSqFt = perimeterFt * wallHeight;
+        const netExteriorWallSqFt = subtractOpenings ? Math.max(0, exteriorWallSqFt - openings.totalSqFt) : exteriorWallSqFt;
+        results.push({ label: 'Gross Exterior Wall Area', value: `${fmt(exteriorWallSqFt)} ft² / ${fmt(exteriorWallSqFt * AREA_TO_SQM['sq ft'])} m²`, wide: true });
+        results.push({ label: 'Net Exterior Wall Area', value: `${fmt(netExteriorWallSqFt)} ft² / ${fmt(netExteriorWallSqFt * AREA_TO_SQM['sq ft'])} m²`, wide: true });
+      } else {
+        results.push({ label: 'Exterior Wall Area', value: 'Enter wall height to calculate gross and net wall area', wide: true });
+      }
+      return results;
+    }
+
     function calculate(type) {
       const error = document.getElementById(`${type}-error`);
       error.textContent = '';
@@ -1398,6 +1599,8 @@
         if (type === 'boardfoot') return renderResults('boardfoot', calculateBoardFoot());
         if (type === 'rebar') return renderResults('rebar', calculateRebar());
         if (type === 'electrical') return renderResults('electrical', calculateElectrical());
+        if (type === 'concrete') return renderResults('concrete', calculateConcrete());
+        if (type === 'buildingarea') return renderResults('buildingarea', calculateBuildingArea());
         if (type === 'box') { const v = validatePositive('box', ['length', 'width', 'height']); return renderResults('box', [...volumeResults(v.length * v.width * v.height), ...lengthResults(2 * (v.length + v.width), 'Base Perimeter'), ...lengthResults(4 * (v.length + v.width + v.height), 'Total Edge Length')]); }
         if (type === 'cylinder') { const v = validatePositive('cylinder', ['diameter', 'height']); const radius = v.diameter / 2; return renderResults('cylinder', [...volumeResults(Math.PI * radius * radius * v.height), ...lengthResults(Math.PI * v.diameter, 'Base Circumference')]); }
         if (type === 'rectangle') { const v = validatePositive('rectangle', ['length', 'width']); return renderResults('rectangle', [...areaResults(v.length * v.width), ...lengthResults(2 * (v.length + v.width), 'Perimeter')]); }
@@ -1407,6 +1610,10 @@
       } catch (err) { error.textContent = err.message; renderResults(type, []); }
     }
 
+    document.getElementById('buildingarea-add-window').addEventListener('click', () => addBuildingAreaOpening('window'));
+    document.getElementById('buildingarea-add-door').addEventListener('click', () => addBuildingAreaOpening('door'));
+    addBuildingAreaOpening('window');
+    addBuildingAreaOpening('door');
     document.querySelectorAll('[data-calc]').forEach(button => button.addEventListener('click', () => calculate(button.dataset.calc)));
     document.querySelectorAll('[data-clear]').forEach(button => button.addEventListener('click', () => {
       const id = button.dataset.clear;
@@ -1415,6 +1622,8 @@
       if (id === 'boardfoot') { document.getElementById('boardfoot-quantity').value = '1'; document.getElementById('boardfoot-price').value = ''; }
       if (id === 'rebar') { document.getElementById('rebar-waste').value = '10'; document.getElementById('rebar-price').value = ''; document.getElementById('rebar-size').value = '0.668'; }
       if (id === 'electrical') { ['electrical-volts','electrical-amps','electrical-watts','electrical-ohms','electrical-run-ft','electrical-load-amps','electrical-breaker'].forEach(x => document.getElementById(x).value = ''); document.getElementById('electrical-circuit-volts').value = '120'; document.getElementById('electrical-wire-size').value = '1.588'; document.getElementById('electrical-phase').value = 'single'; }
+      if (id === 'concrete') { document.getElementById('concrete-shape').value = 'slab'; document.getElementById('concrete-quantity').value = '1'; document.getElementById('concrete-waste').value = '10'; document.getElementById('concrete-bag-yield').value = '0.60'; }
+      if (id === 'buildingarea') { document.getElementById('buildingarea-floors').value = '1'; document.getElementById('buildingarea-waste').value = '0'; document.getElementById('buildingarea-subtract-openings').checked = true; document.getElementById('buildingarea-openings').innerHTML = ''; addBuildingAreaOpening('window'); addBuildingAreaOpening('door'); }
       renderResults(id, []);
     }));
     document.querySelectorAll('.tab[data-target]').forEach(tab => tab.addEventListener('click', () => {
