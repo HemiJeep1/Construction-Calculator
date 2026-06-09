@@ -1857,8 +1857,9 @@
       }
 
       function openTool(name) {
-        if (!TOOL_HTML_B64[name]) return;
+        if (!TOOL_HTML_B64[name]) { alert('This calculator is not available in this file: ' + name); return; }
         title.textContent = name;
+        viewer.style.display = '';
         viewer.classList.add('open');
         document.body.style.overflow = 'hidden';
         frame.srcdoc = b64ToUtf8(TOOL_HTML_B64[name]);
@@ -1867,6 +1868,7 @@
       function closeTool() {
         frame.removeAttribute('srcdoc');
         viewer.classList.remove('open');
+        viewer.style.display = '';
         document.body.style.overflow = '';
       }
 
@@ -1894,7 +1896,7 @@
           panel.classList.toggle('hidden', panel.id !== firstTarget);
         });
         var toolViewer = document.getElementById('tool-viewer');
-        if (toolViewer) toolViewer.style.display = 'none';
+        if (toolViewer) { toolViewer.classList.remove('open'); toolViewer.style.display = ''; }
       } catch(e) {}
     });
 </script>
