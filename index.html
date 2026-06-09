@@ -52,6 +52,12 @@
     .tab:hover, button:hover { transform: translateY(-1px); }
     .tab.active { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #191600; border-color: transparent; }
 
+    #buildingarea .actions #buildingarea-add-window,
+    #buildingarea .actions #buildingarea-add-door {
+      flex: 1 1 180px;
+      text-align: center;
+    }
+
     .panel-wrap { display: grid; gap: 18px; }
     .card { background: rgba(29,34,43,.92); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; }
     .hidden { display: none !important; }
@@ -264,8 +270,9 @@
       .pro-keys .calc-key { min-height: 38px; }
     }
 
-    .tab.tool-tab { background: linear-gradient(180deg, #2a303a, #1c222b); border-color: rgba(255,255,255,.16); }
-    .tab.tool-tab::before { content: "+ "; color: #ffd23f; font-weight: 900; }
+    /* Added calculator buttons now match the main calculator buttons. */
+    .tab.tool-tab { background: rgba(38,45,56,.9); color: var(--text); border: 1px solid var(--border); }
+    .tab.tool-tab::before { content: none; }
 
     .more-tools-card { margin-top: 14px; }
     nav .more-tools-card { padding: 14px; }
@@ -344,8 +351,8 @@
   <main>
     <nav aria-label="Calculator options">
       <div class="tabs">
-        <button type="button" class="tab" data-target="calculator">Calculator</button>
-        <button type="button" class="tab active" data-target="box">Volume Box</button>
+        <button type="button" class="tab active" data-target="calculator">Calculator</button>
+        <button type="button" class="tab" data-target="box">Volume Box</button>
         <button type="button" class="tab" data-target="cylinder">Volume Cylinder</button>
         <button type="button" class="tab" data-target="rectangle">Area Rectangle</button>
         <button type="button" class="tab" data-target="circlearea">Area Circle</button>
@@ -395,7 +402,7 @@
         <iframe id="embedded-tool-frame" title="Embedded calculator"></iframe>
       </section>
 
-      <section id="box" class="card calc-panel" data-type="volume">
+      <section id="box" class="card calc-panel hidden" data-type="volume">
         <div class="section-title"><div><h2>Volume Box</h2><p class="hint">Enter length, width, and height.</p></div><span class="formula">L × W × H</span></div>
         <div class="grid three" data-fields="length,width,height"></div>
         <div class="actions"><button type="button" class="primary" data-calc="box">Calculate</button><button type="button" class="secondary" data-clear="box">Clear</button></div>
@@ -481,7 +488,7 @@
         <div class="error" id="boardfoot-error"></div><div class="results" id="boardfoot-results"></div>
       </section>
 
-      <section id="calculator" class="card calc-panel hidden pro-card">
+      <section id="calculator" class="card calc-panel pro-card">
         <div class="section-title"><div><h2>Calculator</h2><p class="hint">A construction-style calculator with history, math keys, decimal mode, and direct feet/inches/fraction entry. Uses the on-screen keys only on iPhone.</p></div><span class="formula">General Calculator</span></div>
 
         <div class="unit-switch" aria-label="Calculator mode">
@@ -725,8 +732,8 @@
           <div class="section-title" style="margin-bottom:8px"><div><h3 style="margin:0">Windows and Doors</h3><p class="hint">Enter each opening size and quantity. Use the current input unit mode: feet/inches/fractions or metres/millimetres.</p></div></div>
           <div id="buildingarea-openings"></div>
           <div class="actions" style="margin-top:10px">
-            <button type="button" class="secondary" id="buildingarea-add-window">+ Add Window</button>
-            <button type="button" class="secondary" id="buildingarea-add-door">+ Add Door</button>
+            <button type="button" class="tab" id="buildingarea-add-window">+ Add Window</button>
+            <button type="button" class="tab" id="buildingarea-add-door">+ Add Door</button>
           </div>
         </div>
 
@@ -1875,7 +1882,22 @@
       closeBtn.addEventListener('click', closeTool);
       closeBtn.addEventListener('touchend', function(event){ event.preventDefault(); closeTool(); }, { passive:false });
     })();
-  </script>
+  
+    // Startup: always open and highlight the first calculator button.
+    window.addEventListener('DOMContentLoaded', function(){
+      try {
+        var firstBtn = document.querySelector('.tab[data-target]');
+        var firstTarget = firstBtn ? firstBtn.getAttribute('data-target') : 'calculator';
+        document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
+        if (firstBtn) firstBtn.classList.add('active');
+        document.querySelectorAll('.calc-panel').forEach(function(panel){
+          panel.classList.toggle('hidden', panel.id !== firstTarget);
+        });
+        var toolViewer = document.getElementById('tool-viewer');
+        if (toolViewer) toolViewer.style.display = 'none';
+      } catch(e) {}
+    });
+</script>
 
 </body>
 </html>
