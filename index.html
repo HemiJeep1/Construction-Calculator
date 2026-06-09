@@ -344,14 +344,16 @@
   <main>
     <nav aria-label="Calculator options">
       <div class="tabs">
+        <button type="button" class="tab" data-target="calculator">Calculator</button>
         <button type="button" class="tab active" data-target="box">Volume Box</button>
         <button type="button" class="tab" data-target="cylinder">Volume Cylinder</button>
         <button type="button" class="tab" data-target="rectangle">Area Rectangle</button>
+        <button type="button" class="tab" data-target="circlearea">Area Circle</button>
         <button type="button" class="tab" data-target="triangle">Area Triangle</button>
         <button type="button" class="tab" data-target="trapezoid">Area Trapezoid</button>
         <button type="button" class="tab" data-target="perimeter">Perimeter</button>
         <button type="button" class="tab" data-target="boardfoot">Board Foot</button>
-        <button type="button" class="tab" data-target="calculator">Calculator</button>
+        <button type="button" class="tab" data-target="rebar">Rebar</button>
         <button type="button" class="tab" data-target="converter">Metric Converter</button>
         <button type="button" class="tab tool-tab" data-open-tool="Baluster Calculator">Baluster</button>
         <button type="button" class="tab tool-tab" data-open-tool="Cutlist 2D Optimizer">Cutlist 2D</button>
@@ -361,6 +363,7 @@
         <button type="button" class="tab tool-tab" data-open-tool="Rafter Calculator">Rafter</button>
         <button type="button" class="tab tool-tab" data-open-tool="Stair Calculator">Stair</button>
         <button type="button" class="tab tool-tab" data-open-tool="Wall Paneling Calculator">Wall Paneling</button>
+        <button type="button" class="tab" data-target="electrical">Electrical</button>
       </div>
     </nav>
 
@@ -409,6 +412,36 @@
         <div class="grid" data-fields="length,width"></div>
         <div class="actions"><button type="button" class="primary" data-calc="rectangle">Calculate</button><button type="button" class="secondary" data-clear="rectangle">Clear</button></div>
         <div class="error" id="rectangle-error"></div><div class="results" id="rectangle-results"></div>
+      </section>
+
+      <section id="circlearea" class="card calc-panel hidden" data-type="area">
+        <div class="section-title"><div><h2>Area Circle</h2><p class="hint">Enter either diameter or radius. The calculator will use diameter first if both are entered.</p></div><span class="formula">Area: πr² | Circumference: πD</span></div>
+        <div class="grid" data-fields="diameter,radius"></div>
+        <div class="actions"><button type="button" class="primary" data-calc="circlearea">Calculate Circle Area</button><button type="button" class="secondary" data-clear="circlearea">Clear</button></div>
+        <div class="error" id="circlearea-error"></div><div class="results" id="circlearea-results"></div>
+      </section>
+
+
+
+      <section id="rebar" class="card calc-panel hidden" data-type="length">
+        <div class="section-title"><div><h2>Rebar Calculator</h2><p class="hint">Estimate bars, total length, lap allowance, waste, and weight for a rectangular slab/grid.</p></div><span class="formula">Bars = floor(clear span ÷ spacing) + 1</span></div>
+        <div class="grid three" data-fields="length,width,spacing,edge cover,lap allowance"></div>
+        <div class="converter" style="margin-top:14px">
+          <div class="measurement"><label for="rebar-size">Rebar Size</label><select id="rebar-size">
+            <option value="0.376" data-label="#3 / 10M">#3 / 10M - 0.376 lb/ft</option>
+            <option value="0.668" data-label="#4 / 13M" selected>#4 / 13M - 0.668 lb/ft</option>
+            <option value="1.043" data-label="#5 / 16M">#5 / 16M - 1.043 lb/ft</option>
+            <option value="1.502" data-label="#6 / 19M">#6 / 19M - 1.502 lb/ft</option>
+            <option value="2.044" data-label="#7 / 22M">#7 / 22M - 2.044 lb/ft</option>
+            <option value="2.670" data-label="#8 / 25M">#8 / 25M - 2.670 lb/ft</option>
+            <option value="3.400" data-label="#9 / 29M">#9 / 29M - 3.400 lb/ft</option>
+            <option value="4.303" data-label="#10 / 32M">#10 / 32M - 4.303 lb/ft</option>
+          </select></div>
+          <div class="measurement"><label for="rebar-waste">Waste Percentage</label><input id="rebar-waste" type="number" step="any" min="0" value="10" /></div>
+          <div class="measurement"><label for="rebar-price">Optional Price per Foot</label><input id="rebar-price" type="number" step="any" min="0" placeholder="0.00" /></div>
+        </div>
+        <div class="actions"><button type="button" class="primary" data-calc="rebar">Calculate Rebar</button><button type="button" class="secondary" data-clear="rebar">Clear</button></div>
+        <div class="error" id="rebar-error"></div><div class="results" id="rebar-results"></div>
       </section>
 
       <section id="triangle" class="card calc-panel hidden" data-type="area">
@@ -600,6 +633,46 @@
 
         <div class="actions"><button type="button" class="primary" id="calc-equals">Calculate</button><button type="button" class="secondary" id="calc-clear">Clear</button></div>
         <div class="error" id="calculator-error"></div><div class="results" id="calculator-results"></div>
+      </section>
+
+
+
+      <section id="electrical" class="card calc-panel hidden">
+        <div class="section-title"><div><h2>Electrical Calculator</h2><p class="hint">Calculate Ohm's law, watts, amps, voltage drop, and basic breaker load values.</p></div><span class="formula">V = I × R | W = V × A</span></div>
+
+        <h3 style="margin:0 0 10px">Ohm's Law / Power</h3>
+        <p class="hint">Enter any two values below to solve the rest.</p>
+        <div class="converter">
+          <div class="measurement"><label for="electrical-volts">Voltage</label><input id="electrical-volts" type="number" step="any" min="0" placeholder="120" /><span class="sub-label">volts</span></div>
+          <div class="measurement"><label for="electrical-amps">Current</label><input id="electrical-amps" type="number" step="any" min="0" placeholder="15" /><span class="sub-label">amps</span></div>
+          <div class="measurement"><label for="electrical-watts">Power</label><input id="electrical-watts" type="number" step="any" min="0" placeholder="1800" /><span class="sub-label">watts</span></div>
+          <div class="measurement"><label for="electrical-ohms">Resistance</label><input id="electrical-ohms" type="number" step="any" min="0" placeholder="8" /><span class="sub-label">ohms</span></div>
+        </div>
+
+        <h3 style="margin:18px 0 10px">Voltage Drop</h3>
+        <p class="hint">Use one-way circuit length. Copper conductors only. Results are estimates.</p>
+        <div class="converter">
+          <div class="measurement"><label for="electrical-run-ft">One-Way Run Length</label><input id="electrical-run-ft" type="number" step="any" min="0" placeholder="50" /><span class="sub-label">feet</span></div>
+          <div class="measurement"><label for="electrical-load-amps">Load Current</label><input id="electrical-load-amps" type="number" step="any" min="0" placeholder="15" /><span class="sub-label">amps</span></div>
+          <div class="measurement"><label for="electrical-circuit-volts">Circuit Voltage</label><input id="electrical-circuit-volts" type="number" step="any" min="0" value="120" /><span class="sub-label">volts</span></div>
+          <div class="measurement"><label for="electrical-wire-size">Wire Size</label><select id="electrical-wire-size">
+            <option value="2.525">14 AWG copper</option>
+            <option value="1.588" selected>12 AWG copper</option>
+            <option value="0.999">10 AWG copper</option>
+            <option value="0.6282">8 AWG copper</option>
+            <option value="0.3951">6 AWG copper</option>
+            <option value="0.2485">4 AWG copper</option>
+            <option value="0.1563">2 AWG copper</option>
+            <option value="0.1239">1 AWG copper</option>
+            <option value="0.0983">1/0 AWG copper</option>
+            <option value="0.0779">2/0 AWG copper</option>
+          </select><span class="sub-label">ohms per 1000 ft</span></div>
+          <div class="measurement"><label for="electrical-phase">Circuit Type</label><select id="electrical-phase"><option value="single" selected>Single phase / 2-wire</option><option value="three">Three phase</option></select></div>
+          <div class="measurement"><label for="electrical-breaker">Breaker Size</label><input id="electrical-breaker" type="number" step="any" min="0" placeholder="15" /><span class="sub-label">amps</span></div>
+        </div>
+
+        <div class="actions"><button type="button" class="primary" data-calc="electrical">Calculate Electrical</button><button type="button" class="secondary" data-clear="electrical">Clear</button></div>
+        <div class="error" id="electrical-error"></div><div class="results" id="electrical-results"></div>
       </section>
 
       <section id="converter" class="card calc-panel hidden">
@@ -840,6 +913,54 @@
       if (shape === 'box-base') { const v = validatePositive('perimeter', ['length', 'width']); return lengthResults(2 * (v.length + v.width), 'Box Base Perimeter'); }
       if (shape === 'box-edges') { const v = validatePositive('perimeter', ['length', 'width', 'height']); return lengthResults(4 * (v.length + v.width + v.height), 'Box Total Edge Length'); }
       throw new Error('Choose a perimeter shape.');
+    }
+
+
+
+
+    function calculateRebar() {
+      const v = validatePositive('rebar', ['length', 'width', 'spacing']);
+      const edgeCover = optionalPositive('rebar', 'edge cover') || 0;
+      const lapAllowance = optionalPositive('rebar', 'lap allowance') || 0;
+      const wasteRaw = parseFloat(document.getElementById('rebar-waste').value || '0');
+      const wastePct = Number.isFinite(wasteRaw) && wasteRaw > 0 ? wasteRaw : 0;
+      const priceRaw = parseFloat(document.getElementById('rebar-price').value || '0');
+      const pricePerFoot = Number.isFinite(priceRaw) && priceRaw > 0 ? priceRaw : 0;
+      const sizeEl = document.getElementById('rebar-size');
+      const lbPerFt = parseFloat(sizeEl.value) || 0.668;
+      const sizeLabel = sizeEl.options[sizeEl.selectedIndex].dataset.label || sizeEl.options[sizeEl.selectedIndex].text;
+
+      const clearLength = v.length - 2 * edgeCover;
+      const clearWidth = v.width - 2 * edgeCover;
+      if (!(clearLength > 0 && clearWidth > 0)) throw new Error('Edge cover is too large for the slab length/width.');
+
+      const barsRunningLength = Math.floor(clearWidth / v.spacing) + 1;
+      const barsRunningWidth = Math.floor(clearLength / v.spacing) + 1;
+      const totalBars = barsRunningLength + barsRunningWidth;
+      const baseLength = barsRunningLength * clearLength + barsRunningWidth * clearWidth;
+      const lapLength = totalBars * lapAllowance;
+      const lengthWithLaps = baseLength + lapLength;
+      const totalLength = lengthWithLaps * (1 + wastePct / 100);
+      const totalWeightLb = totalLength * lbPerFt;
+      const totalWeightKg = totalWeightLb * 0.45359237;
+      const spacingIn = v.spacing * 12;
+      const spacingMm = v.spacing * LENGTH_TO_METERS.foot / LENGTH_TO_METERS.millimeter;
+      const results = [
+        { label: 'Rebar Size', value: sizeLabel },
+        { label: 'Bars Running Length Direction', value: `${fmt(barsRunningLength, 0)} bars` },
+        { label: 'Bars Running Width Direction', value: `${fmt(barsRunningWidth, 0)} bars` },
+        { label: 'Total Bars', value: `${fmt(totalBars, 0)} bars` },
+        { label: 'Clear Length', value: `${fmt(clearLength)} ft / ${fmt(clearLength * LENGTH_TO_METERS.foot)} m` },
+        { label: 'Clear Width', value: `${fmt(clearWidth)} ft / ${fmt(clearWidth * LENGTH_TO_METERS.foot)} m` },
+        { label: 'Spacing', value: `${fmt(spacingIn, 3)} in / ${fmt(spacingMm, 1)} mm` },
+        { label: 'Base Rebar Length', value: `${fmt(baseLength)} ft / ${fmt(baseLength * LENGTH_TO_METERS.foot)} m` },
+        { label: 'Lap Allowance Total', value: `${fmt(lapLength)} ft / ${fmt(lapLength * LENGTH_TO_METERS.foot)} m` },
+        { label: 'Length with Laps', value: `${fmt(lengthWithLaps)} ft / ${fmt(lengthWithLaps * LENGTH_TO_METERS.foot)} m` },
+        { label: `Total Length with ${fmt(wastePct, 2)}% Waste`, value: `${fmt(totalLength)} ft / ${fmt(totalLength * LENGTH_TO_METERS.foot)} m`, wide: true },
+        { label: 'Estimated Weight', value: `${fmt(totalWeightLb, 2)} lb / ${fmt(totalWeightKg, 2)} kg`, wide: true }
+      ];
+      if (pricePerFoot > 0) results.push({ label: 'Estimated Cost', value: `$${fmt(totalLength * pricePerFoot, 2)}`, wide: true });
+      return results;
     }
 
 
@@ -1207,15 +1328,80 @@
       }
     }
 
+
+
+    function readNum(id) {
+      const v = parseFloat(document.getElementById(id).value || '');
+      return Number.isFinite(v) && v > 0 ? v : null;
+    }
+
+    function calculateElectrical() {
+      const results = [];
+      let volts = readNum('electrical-volts');
+      let amps = readNum('electrical-amps');
+      let watts = readNum('electrical-watts');
+      let ohms = readNum('electrical-ohms');
+
+      const known = [volts, amps, watts, ohms].filter(v => v !== null).length;
+      if (known >= 2) {
+        if (volts !== null && amps !== null) { watts = volts * amps; ohms = volts / amps; }
+        else if (volts !== null && watts !== null) { amps = watts / volts; ohms = volts / amps; }
+        else if (volts !== null && ohms !== null) { amps = volts / ohms; watts = volts * amps; }
+        else if (amps !== null && watts !== null) { volts = watts / amps; ohms = volts / amps; }
+        else if (amps !== null && ohms !== null) { volts = amps * ohms; watts = volts * amps; }
+        else if (watts !== null && ohms !== null) { amps = Math.sqrt(watts / ohms); volts = amps * ohms; }
+        results.push({ label: 'Voltage', value: `${fmt(volts, 4)} V` });
+        results.push({ label: 'Current', value: `${fmt(amps, 4)} A` });
+        results.push({ label: 'Power', value: `${fmt(watts, 4)} W / ${fmt(watts / 1000, 4)} kW` });
+        results.push({ label: 'Resistance', value: `${fmt(ohms, 4)} Ω` });
+      }
+
+      const runFt = readNum('electrical-run-ft');
+      const loadA = readNum('electrical-load-amps');
+      const circuitV = readNum('electrical-circuit-volts');
+      if (runFt !== null && loadA !== null && circuitV !== null) {
+        const wireEl = document.getElementById('electrical-wire-size');
+        const ohmsPer1000 = parseFloat(wireEl.value);
+        const phase = document.getElementById('electrical-phase').value;
+        const multiplier = phase === 'three' ? Math.sqrt(3) : 2;
+        const voltageDrop = multiplier * runFt * loadA * ohmsPer1000 / 1000;
+        const dropPct = voltageDrop / circuitV * 100;
+        const delivered = circuitV - voltageDrop;
+        results.push({ label: 'Wire Size', value: wireEl.options[wireEl.selectedIndex].text });
+        results.push({ label: 'Voltage Drop', value: `${fmt(voltageDrop, 3)} V` });
+        results.push({ label: 'Voltage Drop Percent', value: `${fmt(dropPct, 2)}%` });
+        results.push({ label: 'Estimated Voltage at Load', value: `${fmt(delivered, 3)} V` });
+        results.push({ label: 'One-Way Run', value: `${fmt(runFt, 2)} ft / ${fmt(runFt * LENGTH_TO_METERS.foot, 2)} m` });
+      }
+
+      const breaker = readNum('electrical-breaker');
+      const breakerVoltage = circuitV || volts;
+      if (breaker !== null) {
+        const continuousAmps = breaker * 0.8;
+        results.push({ label: 'Breaker Size', value: `${fmt(breaker, 2)} A` });
+        results.push({ label: '80% Continuous Load', value: `${fmt(continuousAmps, 2)} A` });
+        if (breakerVoltage !== null) {
+          results.push({ label: 'Approx. Max Continuous Watts', value: `${fmt(continuousAmps * breakerVoltage, 2)} W` });
+        }
+      }
+
+      if (!results.length) throw new Error('Enter at least two Ohm\'s law values, or enter run length, load amps, and circuit voltage for voltage drop.');
+      results.push({ label: 'Note', value: 'Electrical results are estimates. Verify conductor size, voltage drop, code rules, and installation requirements with applicable electrical code.', wide: true });
+      return results;
+    }
+
     function calculate(type) {
       const error = document.getElementById(`${type}-error`);
       error.textContent = '';
       try {
         if (type === 'perimeter') return renderResults('perimeter', calculatePerimeter());
         if (type === 'boardfoot') return renderResults('boardfoot', calculateBoardFoot());
+        if (type === 'rebar') return renderResults('rebar', calculateRebar());
+        if (type === 'electrical') return renderResults('electrical', calculateElectrical());
         if (type === 'box') { const v = validatePositive('box', ['length', 'width', 'height']); return renderResults('box', [...volumeResults(v.length * v.width * v.height), ...lengthResults(2 * (v.length + v.width), 'Base Perimeter'), ...lengthResults(4 * (v.length + v.width + v.height), 'Total Edge Length')]); }
         if (type === 'cylinder') { const v = validatePositive('cylinder', ['diameter', 'height']); const radius = v.diameter / 2; return renderResults('cylinder', [...volumeResults(Math.PI * radius * radius * v.height), ...lengthResults(Math.PI * v.diameter, 'Base Circumference')]); }
         if (type === 'rectangle') { const v = validatePositive('rectangle', ['length', 'width']); return renderResults('rectangle', [...areaResults(v.length * v.width), ...lengthResults(2 * (v.length + v.width), 'Perimeter')]); }
+        if (type === 'circlearea') { const diameter = optionalPositive('circlearea', 'diameter'); const radiusInput = optionalPositive('circlearea', 'radius'); if (diameter === null && radiusInput === null) throw new Error('Enter a diameter or radius.'); const radius = diameter !== null ? diameter / 2 : radiusInput; const usedDiameter = diameter !== null ? diameter : radius * 2; return renderResults('circlearea', [...areaResults(Math.PI * radius * radius), ...lengthResults(Math.PI * usedDiameter, 'Circumference'), ...lengthResults(radius, 'Radius'), ...lengthResults(usedDiameter, 'Diameter')]); }
         if (type === 'triangle') { const v = validatePositive('triangle', ['base', 'height']); const side2 = optionalPositive('triangle', 'side 2'); const side3 = optionalPositive('triangle', 'side 3'); const results = areaResults(0.5 * v.base * v.height); if (side2 !== null && side3 !== null) results.push(...lengthResults(v.base + side2 + side3, 'Perimeter')); else results.push({ label: 'Perimeter', value: 'Enter side 2 and side 3', wide: true }); return renderResults('triangle', results); }
         if (type === 'trapezoid') { const v = validatePositive('trapezoid', ['top base', 'bottom base', 'height']); const leftSide = optionalPositive('trapezoid', 'left side'); const rightSide = optionalPositive('trapezoid', 'right side'); const results = areaResults(0.5 * (v['top base'] + v['bottom base']) * v.height); if (leftSide !== null && rightSide !== null) results.push(...lengthResults(v['top base'] + v['bottom base'] + leftSide + rightSide, 'Perimeter')); else results.push({ label: 'Perimeter', value: 'Enter left side and right side', wide: true }); return renderResults('trapezoid', results); }
       } catch (err) { error.textContent = err.message; renderResults(type, []); }
@@ -1227,6 +1413,8 @@
       document.querySelectorAll(`[data-panel="${id}"]`).forEach(input => { input.value = input.tagName === 'SELECT' ? '0' : ''; });
       document.getElementById(`${id}-error`).textContent = '';
       if (id === 'boardfoot') { document.getElementById('boardfoot-quantity').value = '1'; document.getElementById('boardfoot-price').value = ''; }
+      if (id === 'rebar') { document.getElementById('rebar-waste').value = '10'; document.getElementById('rebar-price').value = ''; document.getElementById('rebar-size').value = '0.668'; }
+      if (id === 'electrical') { ['electrical-volts','electrical-amps','electrical-watts','electrical-ohms','electrical-run-ft','electrical-load-amps','electrical-breaker'].forEach(x => document.getElementById(x).value = ''); document.getElementById('electrical-circuit-volts').value = '120'; document.getElementById('electrical-wire-size').value = '1.588'; document.getElementById('electrical-phase').value = 'single'; }
       renderResults(id, []);
     }));
     document.querySelectorAll('.tab[data-target]').forEach(tab => tab.addEventListener('click', () => {
